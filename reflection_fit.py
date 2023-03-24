@@ -113,7 +113,8 @@ if background_removal:
 ax.plot(curve.x, curve_fitted, label='T2 (fitted)')
 
 # ax.plot(int_s.x, int_s.y, label='Rs (Fit)')
-ax.set_xlabel("IntAngle")
+ax.set_xlabel("Internal Angle")
+ax.set_ylabel("Normalized Intensity")
 
 ax.legend()
 ax.grid()
