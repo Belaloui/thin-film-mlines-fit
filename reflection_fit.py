@@ -14,7 +14,8 @@ from mlines_data_tools import write_curve_data, read_curve_data,\
 
 # Script parameters
 fit_method = 'scipy'
-polarization = 'p'
+polarization = 's'
+background_removal = False
 
 if polarization == 's':
     model_func = rs_fit
@@ -36,9 +37,12 @@ elif polarization == 'p':
                                 x_lim=(36.5, 50))
 
 # Transfer function
-corrected_x = transfer.x
-corrected_y = [y1/y2 for y1, y2 in zip(curve.y, transfer.y)]
-
+if background_removal:
+    corrected_x = transfer.x
+    corrected_y = [y1/y2 for y1, y2 in zip(curve.y, transfer.y)]
+else:
+    corrected_x = curve.x
+    corrected_y = curve.y
 
 # Cutting of the data at higher values of y.
 # curve = cutoff_data(curve=org_curve, threshold=0.3)
@@ -89,7 +93,8 @@ ax.plot(model_curve.x, model_curve.y, label='Model')
 ax.plot(curve.x, curve.y, label=f'R{polarization} (Metricon T2)',
         marker='None')
 
-ax.plot(corrected_x, corrected_y, label='Corrected T2 with air')
+if background_removal:
+    ax.plot(corrected_x, corrected_y, label='Corrected T2 with air')
 
 ax.plot(curve.x, curve_fitted, label='T2 (fitted)')
 
