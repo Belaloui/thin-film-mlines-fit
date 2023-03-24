@@ -15,7 +15,14 @@ from mlines_data_tools import write_curve_data, read_curve_data,\
 # Script parameters
 fit_method = 'scipy'
 polarization = 's'
-background_removal = False
+background_removal = True
+
+transfer_filename = 'Metricon/Corrected/TE-air.txt'
+curve_filename = 'Metricon/Corrected/T2 TE.txt'
+
+# Printing the script parameters. VERBOSE
+print( 'Method | Polar. | BG remove')
+print(f' {fit_method} |   {polarization}    | {background_removal}\n')
 
 if polarization == 's':
     model_func = rs_fit
@@ -30,6 +37,9 @@ if polarization == 's':
                                    x_lim=(34, 52))
     curve = read_curve_metricon(file_name='Metricon/Corrected/T2 TE.txt',
                                 x_lim=(34, 52))
+    # Printing the curve's file name. VERBOSE
+    print(f'Using "{curve_filename}"\n')
+    
 elif polarization == 'p':
     transfer = read_curve_metricon(file_name='Metricon/Corrected/TM-air.txt',
                                    x_lim=(36.5, 50))
@@ -51,7 +61,8 @@ else:
 
 if fit_method == 'scipy':
     params, pcov = curve_fit(model_func, curve.x, corrected_y,
-                              bounds=[[420, 20, 1.9, 0], [500, 160, 2, 0.1]])
+                              bounds=[[420, 20, 1.9, 0], [500, 160, 2, 0.1]],
+                              verbose=2)
     curve_fitted = rs_fit(curve.x, params[0], params[1], params[2], params[3])
 elif fit_method == 'pygad':
     params, curve_fitted = pygad_fitting(model_func, curve.x, corrected_y,
@@ -84,7 +95,10 @@ elif polarization == 'p':
 # write_curve_data((curve.x, int_s), 'sokolov_s')
 # write_curve_data((curve.x, int_p), 'sokolov_p')
 
-# ------------- Plots -------------
+# ------------- Results -------------
+print('\n')
+print(f'Fitted parameters = {params}')
+
 fig, ax = plt.subplots()
 
 ax.plot(model_curve.x, model_curve.y, label='Model')
