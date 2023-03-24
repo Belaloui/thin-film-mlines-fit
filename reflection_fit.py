@@ -12,13 +12,28 @@ from reflection_fitting import rs_fit, rs_fit_gap, rp_fit, pygad_fitting
 from mlines_data_tools import write_curve_data, read_curve_data,\
     read_curve_metricon, cutoff_data
 
-
+# Script parameters
 fit_method = 'scipy'
+polarization = 'p'
 
-transfer = read_curve_metricon(file_name='Metricon/Corrected/TE-air.txt',
-                               x_lim=(34, 52))
-curve = read_curve_metricon(file_name='Metricon/Corrected/T2 TE.txt',
-                            x_lim=(34, 52))
+if polarization == 's':
+    model_func = rs_fit
+elif  polarization == 'p':
+    model_func = rp_fit
+else:
+    raise ValueError(f'The polarization cannot be {polarization}! It can '
+                     f'either be \'s\' or \'p\'.')
+
+if polarization == 's':
+    transfer = read_curve_metricon(file_name='Metricon/Corrected/TE-air.txt',
+                                   x_lim=(34, 52))
+    curve = read_curve_metricon(file_name='Metricon/Corrected/T2 TE.txt',
+                                x_lim=(34, 52))
+elif polarization == 'p':
+    transfer = read_curve_metricon(file_name='Metricon/Corrected/TM-air.txt',
+                                   x_lim=(36.5, 50))
+    curve = read_curve_metricon(file_name='Metricon/Corrected/T2 TM.txt',
+                                x_lim=(36.5, 50))
 
 # Transfer function
 corrected_x = transfer.x
@@ -31,11 +46,11 @@ corrected_y = [y1/y2 for y1, y2 in zip(curve.y, transfer.y)]
 # print(f'Using {int(100*len(curve_x)/len(curve.x))}% of data.')
 
 if fit_method == 'scipy':
-    params, pcov = curve_fit(rs_fit, curve.x, corrected_y,
+    params, pcov = curve_fit(model_func, curve.x, corrected_y,
                               bounds=[[420, 20, 1.9, 0], [500, 160, 2, 0.1]])
     curve_fitted = rs_fit(curve.x, params[0], params[1], params[2], params[3])
 elif fit_method == 'pygad':
-    params, curve_fitted = pygad_fitting(rs_fit, curve.x, corrected_y,
+    params, curve_fitted = pygad_fitting(model_func, curve.x, corrected_y,
                                           bounds=[[420, 20, 1.9, 0],
                                                   [500, 160, 2, 0.1]])
 else:
@@ -50,8 +65,13 @@ model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
                         n_film=1.9819, m_film=0.00180212556)
 
 # Generating the intensities
-int_s = model.Rs_curve(start=transfer.x[0], end=transfer.x[-1], n_points=400)
-int_s_ys = model.Rs_curve_fit(curve.x)
+if polarization == 's':
+    model_curve = model.Rs_curve(start=transfer.x[0], end=transfer.x[-1],
+                                 n_points=400)
+elif polarization == 'p':
+    model_curve = model.Rp_curve(start=transfer.x[0], end=transfer.x[-1],
+                                 n_points=400)
+
 # int_p = model.Rp_curve(start=35.5, end=50, n_points=400)
 # int_s = model.Rs_curve(start=31, end=45, n_points=400)
 # int_p = model.Rp_curve(start=35, end=45, n_points=2000)
@@ -63,10 +83,10 @@ int_s_ys = model.Rs_curve_fit(curve.x)
 # ------------- Plots -------------
 fig, ax = plt.subplots()
 
-ax.plot(int_s.x, int_s.y, label='Model')
+ax.plot(model_curve.x, model_curve.y, label='Model')
 # ax.plot(transfer.x, transfer.y, label='Rs (Metricon air)',
 #         marker='None')
-ax.plot(curve.x, curve.y, label='Rs (Metricon T2)',
+ax.plot(curve.x, curve.y, label=f'R{polarization} (Metricon T2)',
         marker='None')
 
 ax.plot(corrected_x, corrected_y, label='Corrected T2 with air')
