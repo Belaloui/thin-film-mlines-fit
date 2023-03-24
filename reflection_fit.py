@@ -5,11 +5,15 @@ Created on Mon Jul  4 20:59:58 2022
 """
 import matplotlib.pyplot as plt
 
+from scipy.optimize import curve_fit
+
 from reflection_coeffs import ReflectionModel
 from reflection_fitting import rs_fit, rs_fit_gap, rp_fit, pygad_fitting
 from mlines_data_tools import write_curve_data, read_curve_data,\
     read_curve_metricon, cutoff_data
 
+
+fit_method = 'scipy'
 
 transfer = read_curve_metricon(file_name='Metricon/Corrected/TE-air.txt',
                                x_lim=(34, 52))
@@ -26,13 +30,17 @@ corrected_y = [y1/y2 for y1, y2 in zip(curve.y, transfer.y)]
 
 # print(f'Using {int(100*len(curve_x)/len(curve.x))}% of data.')
 
-# params, pcov = curve_fit(rs_fit, curve.x, corrected_y,
-#                          bounds=[[420, 20, 1.9, 0], [500, 160, 2, 0.1]])
-# curve_fitted = rs_fit(curve.x, params[0], params[1], params[2], params[3])
-
-params, curve_fitted = pygad_fitting(rs_fit, curve.x, corrected_y,
-                                      bounds=[[420, 20, 1.9, 0],
-                                              [500, 160, 2, 0.1]])
+if fit_method == 'scipy':
+    params, pcov = curve_fit(rs_fit, curve.x, corrected_y,
+                              bounds=[[420, 20, 1.9, 0], [500, 160, 2, 0.1]])
+    curve_fitted = rs_fit(curve.x, params[0], params[1], params[2], params[3])
+elif fit_method == 'pygad':
+    params, curve_fitted = pygad_fitting(rs_fit, curve.x, corrected_y,
+                                          bounds=[[420, 20, 1.9, 0],
+                                                  [500, 160, 2, 0.1]])
+else:
+    raise ValueError(f'The fitting method cannot be {fit_method}! It can '
+                     f'either be \'scipy\' or \'pygad\'.')
 
 # --------------------------------------
 # Setting up the model
