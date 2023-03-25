@@ -3,6 +3,44 @@ import numpy as np
 import pygad as pg
 
 # ------------- Fitting tools ------------
+class ModelFunction:
+    """ A tool to get a model's function where certain parameters
+    can be fixed.
+    The fixed parameters are specified at intialization. The model's function
+    to be fitted is simply the model_func method.
+    """
+    def __init__(self, polarization :str, fixed_params : dict):
+        self.polarization = polarization
+        self.fixed_params = fixed_params
+
+    def model_func(self, *args):
+        
+        angles = args[0]
+        params = [0, 0, 0, 0, 0, 0]
+        variables = ['h_immers', 'h_film', 'n_substr', 'm_substr',
+                     'n_film', 'm_film']
+        
+        arg_id = 1
+        for ind, var in enumerate(variables):
+            if var in self.fixed_params:
+                params[ind] = self.fixed_params[var]
+            else:
+                params[ind] = args[arg_id]
+                arg_id += 1
+
+        model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
+                                h_immers=params[0],
+                                h_film=params[1],
+                                n_substr=params[2],
+                                m_substr=params[3],
+                                n_film=params[4],
+                                m_film=params[5])
+        if self.polarization == 's':
+            ret = model.Rs_curve_fit(angles)
+        elif self.polarization == 'p':
+            ret = model.Rp_curve_fit(angles)
+        return ret
+
 def rs_fit(angles, hf, him, nf, mf):
     """ The fitted Rs function. Used to fit Hf, nf, and mf given a
     list of angles (in degrees).

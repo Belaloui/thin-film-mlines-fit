@@ -14,7 +14,8 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 from reflection_coeffs import ReflectionModel
-from reflection_fitting import rs_fit, rs_fit_gap, rp_fit, pygad_fitting
+from reflection_fitting import rs_fit, rs_fit_gap, rp_fit, pygad_fitting,\
+    ModelFunction
 from mlines_data_tools import write_curve_data, read_curve_data,\
     read_curve_metricon, cutoff_data
 
@@ -75,6 +76,19 @@ if background_removal:
 else:
     corrected_x = curve.x
     corrected_y = curve.y
+    
+# DEBUG   ----------------
+model = ModelFunction(polarization='s',
+                      fixed_params={'n_substr':1.51, 'm_substr':0})
+
+class_curve = model.model_func(curve.x, 103, 449,
+                               1.98298, 0.001072122)
+
+plt.plot(curve.x, class_curve, label='ModelFunction')
+plt.show()
+
+model_fun = model.model_func
+# DEBUG   ----------------
 
 # Fitting ...
 if fit_method == 'scipy':
