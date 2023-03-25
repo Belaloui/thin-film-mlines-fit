@@ -3,8 +3,12 @@
 Created on Mon Jul  4 20:59:58 2022
 
 """
+from collections import namedtuple
 import matplotlib.pyplot as plt
+import datetime
+import os
 
+import numpy as np
 from scipy.optimize import curve_fit
 
 from reflection_coeffs import ReflectionModel
@@ -119,3 +123,29 @@ ax.set_ylabel("Normalized Intensity")
 ax.legend()
 ax.grid()
 plt.show()
+
+# ---------- Saving Results ----------- #
+
+# Get date and time for files names
+dt = datetime.datetime.now()
+time_str = dt.strftime("%Y%m%d%H%M%S")
+
+# Creating the results folder
+res_path = f'{time_str}_results'
+if not os.path.exists(res_path):
+   os.makedirs(res_path)
+
+# Save the plot as an EPS file
+fig.savefig(f'{res_path}/{time_str}_curves.eps', format='eps')
+
+# Save the fitted curve
+Curve = namedtuple('Curve', 'x y')
+result_curve = Curve(curve.x, curve_fitted)
+write_curve_data(result_curve, f'{res_path}/{time_str}_fitted_curve')
+
+# Saving the fitted parameters and covariances
+np.savetxt(f'{res_path}/{time_str}_fitted_parameters.txt', params,
+           delimiter=', ')
+if fit_method == 'scipy':
+    np.savetxt(f'{res_path}/{time_str}_covariances.txt', pcov,
+               delimiter=', ')

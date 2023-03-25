@@ -1,3 +1,5 @@
 .spyproject/
 Metricon/
+figures/
+*results/
 __pycache__/
