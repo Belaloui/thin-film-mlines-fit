@@ -8,6 +8,8 @@ import matplotlib.pyplot as plt
 import datetime
 import os
 
+import argparse
+
 import numpy as np
 from scipy.optimize import curve_fit
 
@@ -16,13 +18,38 @@ from reflection_fitting import rs_fit, rs_fit_gap, rp_fit, pygad_fitting
 from mlines_data_tools import write_curve_data, read_curve_data,\
     read_curve_metricon, cutoff_data
 
-# Script parameters
-fit_method = 'scipy'
-polarization = 's'
-background_removal = True
+# ---------- Parser ----------
+parser = argparse.ArgumentParser()
+parser.add_argument('--curve', metavar='Measurement curve', type=str,
+                    required=True,
+                    help="The path to the curve's data")
+parser.add_argument('--fit_method', metavar='Fitting method', type=str,
+                    default='scipy',
+                    help="Can either be 'scipy' or 'pygad'")
+parser.add_argument('--pol', metavar='Polarization', type=str,
+                    required=True,
+                    help="Can either be 's' or 'p'")
+parser.add_argument('--rb', metavar='Background curve', type=str,
+                    help="When a background curve is provided, it is "
+                         "used to remove the measurement curve's backgound")
+args = parser.parse_args()
+# ---------- Parser ----------
 
-transfer_filename = 'Metricon/Corrected/TE-air.txt'
-curve_filename = 'Metricon/Corrected/T2 TE.txt'
+print('\n    -----  M-Lines fitting script  -----\n')  # Header
+
+# Script's parameters
+fit_method = args.fit_method
+polarization = args.pol
+background_removal = args.rb is not None
+
+transfer_filename = args.rb
+curve_filename = args.curve
+
+# Printing the curve's file name. VERBOSE
+print(f'Using "{curve_filename}"\n')
+# Printing the curve's file name. VERBOSE
+if background_removal:
+    print(f'With background "{transfer_filename}"\n')
 
 # Printing the script parameters. VERBOSE
 print( 'Method | Polar. | BG remove')
@@ -36,33 +63,20 @@ else:
     raise ValueError(f'The polarization cannot be {polarization}! It can '
                      f'either be \'s\' or \'p\'.')
 
-if polarization == 's':
-    transfer = read_curve_metricon(file_name='Metricon/Corrected/TE-air.txt',
-                                   x_lim=(34, 52))
-    curve = read_curve_metricon(file_name='Metricon/Corrected/T2 TE.txt',
-                                x_lim=(34, 52))
-    # Printing the curve's file name. VERBOSE
-    print(f'Using "{curve_filename}"\n')
-    
-elif polarization == 'p':
-    transfer = read_curve_metricon(file_name='Metricon/Corrected/TM-air.txt',
-                                   x_lim=(36.5, 50))
-    curve = read_curve_metricon(file_name='Metricon/Corrected/T2 TM.txt',
-                                x_lim=(36.5, 50))
+curve = read_curve_metricon(file_name=curve_filename,
+                            x_lim=(34, 52))
 
-# Transfer function
+# Applying the background removal if a transfer curve is provided.
 if background_removal:
+    transfer = read_curve_metricon(file_name=transfer_filename,
+                                   x_lim=(34, 52))
     corrected_x = transfer.x
     corrected_y = [y1/y2 for y1, y2 in zip(curve.y, transfer.y)]
 else:
     corrected_x = curve.x
     corrected_y = curve.y
 
-# Cutting of the data at higher values of y.
-# curve = cutoff_data(curve=org_curve, threshold=0.3)
-
-# print(f'Using {int(100*len(curve_x)/len(curve.x))}% of data.')
-
+# Fitting ...
 if fit_method == 'scipy':
     params, pcov = curve_fit(model_func, curve.x, corrected_y,
                               bounds=[[420, 20, 1.9, 0], [500, 160, 2, 0.1]],
@@ -85,21 +99,13 @@ model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
 
 # Generating the intensities
 if polarization == 's':
-    model_curve = model.Rs_curve(start=transfer.x[0], end=transfer.x[-1],
+    model_curve = model.Rs_curve(start=curve.x[0], end=curve.x[-1],
                                  n_points=400)
 elif polarization == 'p':
-    model_curve = model.Rp_curve(start=transfer.x[0], end=transfer.x[-1],
+    model_curve = model.Rp_curve(start=curve.x[0], end=curve.x[-1],
                                  n_points=400)
 
-# int_p = model.Rp_curve(start=35.5, end=50, n_points=400)
-# int_s = model.Rs_curve(start=31, end=45, n_points=400)
-# int_p = model.Rp_curve(start=35, end=45, n_points=2000)
-
-# Saving the data
-# write_curve_data((curve.x, int_s), 'sokolov_s')
-# write_curve_data((curve.x, int_p), 'sokolov_p')
-
-# ------------- Results -------------
+# ------------- Showing the results -------------
 print('\n')
 print(f'Fitted parameters = {params}')
 
