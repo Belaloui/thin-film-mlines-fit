@@ -77,18 +77,11 @@ else:
     corrected_x = curve.x
     corrected_y = curve.y
     
-# DEBUG   ----------------
-# model = ModelFunction(polarization='s',
-#                       fixed_params={'n_substr':1.51, 'm_substr':0})
+# Creating the model's function
+model = ModelFunction(polarization='s',
+                      fixed_params={'n_substr':1.51, 'm_substr':0})
+model_fun = model.model_func
 
-# class_curve = model.model_func(curve.x, 103, 449,
-#                                1.98298, 0.001072122)
-
-# plt.plot(curve.x, class_curve, label='ModelFunction')
-# plt.show()
-
-# model_fun = model.model_func
-# DEBUG   ----------------
 
 # Fitting ...
 if fit_method == 'scipy':
