@@ -1,0 +1,3 @@
+fixed = n_substr(1.51), m_substr(0)
+bounds = h_immers(20, 200), h_film(300, 600), n_film(1.9, 2), m_film(0, 0.1)
+limits = 32, 52

@@ -65,3 +65,42 @@ def cutoff_data(curve, threshold):
 
     Curve = namedtuple('Curve', 'x y')
     return Curve(curve_x, curve_y)
+
+def pairwise(iterable):
+    "s -> (s0, s1), (s2, s3), (s4, s5), ..."
+    a = iter(iterable)
+    return zip(a, a)
+
+def read_config(filename):
+    with open(filename, 'r') as f:
+        lines = f.readlines()
+    
+    fixed = {}
+    bounds_dict = {}
+    limits = (float('-inf'), float('inf'))
+
+    for line in lines:
+        line = line.strip() # remove any whitespace
+        if line.startswith('fixed'):
+            fixed_vars = line.split('=')[1].strip().split(',')
+            
+            for a in fixed_vars:
+                var, param = a.split('(')
+                param = param.strip(')')
+                fixed[var.strip()] = float(param)
+
+        elif line.startswith('bounds'):
+            pairs_str = line.split('=')[1].strip()
+            pairs = pairs_str.split(',')
+            for a, b in pairwise(pairs):
+                a = a.strip()
+                b = b.strip()
+                
+                var, bound_1 = a.split('(')
+                bound_2 = b.strip(')')
+                bounds = (float(bound_1), float(bound_2))
+                bounds_dict[var] = bounds
+        elif line.startswith('limits'):
+            limits = tuple(map(int, line.split('=')[1].strip().split(',')))
+    
+    return fixed, bounds_dict, limits
