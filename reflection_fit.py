@@ -65,12 +65,12 @@ else:
                      f'either be \'s\' or \'p\'.')
 
 curve = read_curve_metricon(file_name=curve_filename,
-                            x_lim=(34, 52))
+                            x_lim=(32, 52))
 
 # Applying the background removal if a transfer curve is provided.
 if background_removal:
     transfer = read_curve_metricon(file_name=transfer_filename,
-                                   x_lim=(34, 52))
+                                   x_lim=(32, 52))
     corrected_x = transfer.x
     corrected_y = [y1/y2 for y1, y2 in zip(curve.y, transfer.y)]
 else:
@@ -78,22 +78,22 @@ else:
     corrected_y = curve.y
     
 # DEBUG   ----------------
-model = ModelFunction(polarization='s',
-                      fixed_params={'n_substr':1.51, 'm_substr':0})
+# model = ModelFunction(polarization='s',
+#                       fixed_params={'n_substr':1.51, 'm_substr':0})
 
-class_curve = model.model_func(curve.x, 103, 449,
-                               1.98298, 0.001072122)
+# class_curve = model.model_func(curve.x, 103, 449,
+#                                1.98298, 0.001072122)
 
-plt.plot(curve.x, class_curve, label='ModelFunction')
-plt.show()
+# plt.plot(curve.x, class_curve, label='ModelFunction')
+# plt.show()
 
-model_fun = model.model_func
+# model_fun = model.model_func
 # DEBUG   ----------------
 
 # Fitting ...
 if fit_method == 'scipy':
     params, pcov = curve_fit(model_func, curve.x, corrected_y,
-                              bounds=[[420, 20, 1.9, 0], [500, 160, 2, 0.1]],
+                              bounds=[[200, 20, 1.9, 0], [300, 160, 2, 0.1]],
                               verbose=2)
     curve_fitted = rs_fit(curve.x, params[0], params[1], params[2], params[3])
 elif fit_method == 'pygad':
@@ -104,20 +104,6 @@ else:
     raise ValueError(f'The fitting method cannot be {fit_method}! It can '
                      f'either be \'scipy\' or \'pygad\'.')
 
-# --------------------------------------
-# Setting up the model
-model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
-                        h_immers=150, h_film=450.0,
-                        n_substr=1.515, m_substr=0,
-                        n_film=1.9819, m_film=0.00180212556)
-
-# Generating the intensities
-if polarization == 's':
-    model_curve = model.Rs_curve(start=curve.x[0], end=curve.x[-1],
-                                 n_points=400)
-elif polarization == 'p':
-    model_curve = model.Rp_curve(start=curve.x[0], end=curve.x[-1],
-                                 n_points=400)
 
 # ------------- Showing the results -------------
 print('\n')
@@ -125,7 +111,7 @@ print(f'Fitted parameters = {params}')
 
 fig, ax = plt.subplots()
 
-ax.plot(model_curve.x, model_curve.y, label='Model')
+ax.plot(transfer.x, transfer.y, label='Background')
 # ax.plot(transfer.x, transfer.y, label='Rs (Metricon air)',
 #         marker='None')
 ax.plot(curve.x, curve.y, label=f'R{polarization} (Metricon T2)',

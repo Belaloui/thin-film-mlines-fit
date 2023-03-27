@@ -31,7 +31,7 @@ def read_curves_data(file_name):
         return Curves(ext_ang, int_ang, intens, intens_norm, intens_norm_smth)
 
 
-curves = read_curves_data('Metricon/Corrected/TE-air.txt')
+curves = read_curves_data('Data/T3 TE.txt')
 # curves = read_curves_data('Metricon/Corrected/T1 TE.txt')
 
 fig = plt.figure()
