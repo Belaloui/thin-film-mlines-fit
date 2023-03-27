@@ -86,7 +86,7 @@ model_fun = model.model_func
 # Fitting ...
 if fit_method == 'scipy':
     params, pcov = curve_fit(model_func, curve.x, corrected_y,
-                              bounds=[[200, 20, 1.9, 0], [300, 160, 2, 0.1]],
+                              bounds=[[400, 20, 1.9, 0], [500, 160, 2, 0.1]],
                               verbose=2)
     curve_fitted = rs_fit(curve.x, params[0], params[1], params[2], params[3])
 elif fit_method == 'pygad':
