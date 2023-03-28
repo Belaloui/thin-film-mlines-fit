@@ -3,6 +3,8 @@
 Created on Thu Jul  7 16:28:42 2022
 """
 
+import argparse
+
 import csv
 import matplotlib.pyplot as plt
 
@@ -30,9 +32,16 @@ def read_curves_data(file_name):
                             'intens_norm intens_norm_smth')
         return Curves(ext_ang, int_ang, intens, intens_norm, intens_norm_smth)
 
+# Parsing commands
+parser = argparse.ArgumentParser()
+parser.add_argument('--curve', metavar='Curve data', type=str,
+                    required=True,
+                    help="The path to the curve's data file")
+args = parser.parse_args()
 
-curves = read_curves_data('Data/T3 TE.txt')
-# curves = read_curves_data('Metricon/Corrected/T1 TE.txt')
+curve_filename = args.curve
+
+curves = read_curves_data(curve_filename)
 
 fig = plt.figure()
 ax1 = fig.add_subplot(111)
