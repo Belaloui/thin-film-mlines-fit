@@ -41,42 +41,6 @@ class ModelFunction:
             ret = model.Rp_curve_fit(angles)
         return ret
 
-def rs_fit(angles, hf, him, nf, mf):
-    """ The fitted Rs function. Used to fit Hf, nf, and mf given a
-    list of angles (in degrees).
-    """
-    model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
-                            h_immers=him, h_film=hf,
-                            n_substr=1.51, m_substr=0,
-                            n_film=nf, m_film=mf)
-    rs = model.Rs_curve_fit(angles)
-    return rs
-
-
-def rp_fit(angles, hf, him, nf, mf):
-    """ The fitted Rp function. Used to fit Hf, nf, and mf given a
-    list of angles (in degrees).
-    """
-    model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
-                            h_immers=him, h_film=hf,
-                            n_substr=1.515, m_substr=0,
-                            n_film=nf, m_film=mf)
-    rp = model.Rp_curve_fit(angles)
-    return rp
-
-
-def rs_fit_gap(angles, him):
-    """ The fitted Rs function for the gap. Used to fit H_im given a
-    list of angles (in degrees).
-    """
-    model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
-                            h_immers=him, h_film=450,
-                            n_substr=1.515, m_substr=0,
-                            n_film=1.9819, m_film=0.002)
-    rs = model.Rs_curve_fit(angles)
-    return rs
-
-
 def pygad_fitting(model_func, x_data, y_data, bounds):
 
     def fitness(solution, solution_idx):
