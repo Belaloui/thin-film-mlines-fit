@@ -6,6 +6,7 @@ Created on Mon Jul  4 20:59:58 2022
 from collections import namedtuple
 import matplotlib.pyplot as plt
 import datetime
+import shutil
 import os
 
 import argparse
@@ -123,7 +124,8 @@ print(f'Fitted parameters : {list(bounds_dict.keys())} = {params}')
 
 fig, ax = plt.subplots()
 
-ax.plot(transfer.x, transfer.y, label='Background')
+if background_removal:
+    ax.plot(transfer.x, transfer.y, label='Background')
 # ax.plot(transfer.x, transfer.y, label='Rs (Metricon air)',
 #         marker='None')
 ax.plot(curve.x, curve.y, label=f'R{polarization} (Metricon data)',
@@ -167,3 +169,6 @@ np.savetxt(f'{res_path}/{time_str}_fitted_parameters.txt', params,
 if fit_method == 'scipy':
     np.savetxt(f'{res_path}/{time_str}_covariances.txt', pcov,
                delimiter=', ')
+
+# Saving the config file
+shutil.copyfile(config_filename, f'{res_path}/{time_str}_config.txt')
