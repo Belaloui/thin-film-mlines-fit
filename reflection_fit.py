@@ -13,11 +13,9 @@ import argparse
 import numpy as np
 from scipy.optimize import curve_fit
 
-from reflection_coeffs import ReflectionModel
-from reflection_fitting import rs_fit, rs_fit_gap, rp_fit, pygad_fitting,\
-    ModelFunction
-from mlines_data_tools import write_curve_data, read_curve_data,\
-    read_curve_metricon, cutoff_data, read_config
+from reflection_fitting import pygad_fitting, ModelFunction
+from mlines_data_tools import write_curve_data,\
+    read_curve_metricon, read_config
 
 # ---------- Parser ----------
 parser = argparse.ArgumentParser()
@@ -101,8 +99,6 @@ model = ModelFunction(polarization='s',
                       fixed_params=fixed)
 model_func = model.model_func
 
-model.model_func(curve.x, 450, 100, 1.975, 0.001)
-
 # Fitting ...
 if fit_method == 'scipy':
     p0 = [(a+b)/2 for a,b in zip(min_bounds, max_bounds)]
@@ -123,20 +119,20 @@ else:
 
 # ------------- Showing the results -------------
 print('\n')
-print(f'Fitted parameters = {params}')
+print(f'Fitted parameters : {list(bounds_dict.keys())} = {params}')
 
 fig, ax = plt.subplots()
 
 ax.plot(transfer.x, transfer.y, label='Background')
 # ax.plot(transfer.x, transfer.y, label='Rs (Metricon air)',
 #         marker='None')
-ax.plot(curve.x, curve.y, label=f'R{polarization} (Metricon T2)',
+ax.plot(curve.x, curve.y, label=f'R{polarization} (Metricon data)',
         marker='None')
 
 if background_removal:
-    ax.plot(corrected_x, corrected_y, label='Corrected T2 with air')
+    ax.plot(corrected_x, corrected_y, label='Corrected data')
 
-ax.plot(curve.x, curve_fitted, label='T2 (fitted)')
+ax.plot(curve.x, curve_fitted, label='Fitted curve')
 
 # ax.plot(int_s.x, int_s.y, label='Rs (Fit)')
 ax.set_xlabel("Internal Angle")
