@@ -3,41 +3,43 @@ import numpy as np
 import pygad as pg
 
 # ------------- Fitting tools ------------
-def rs_fit(angles, hf, him, nf, mf):
-    """ The fitted Rs function. Used to fit Hf, nf, and mf given a
-    list of angles (in degrees).
+class ModelFunction:
+    """ A tool to get a model's function where certain parameters
+    can be fixed.
+    The fixed parameters are specified at intialization. The model's function
+    to be fitted is simply the model_func method.
     """
-    model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
-                            h_immers=him, h_film=hf,
-                            n_substr=1.51, m_substr=0,
-                            n_film=nf, m_film=mf)
-    rs = model.Rs_curve_fit(angles)
-    return rs
+    def __init__(self, polarization :str, fixed_params : dict):
+        self.polarization = polarization
+        self.fixed_params = fixed_params
 
+    def model_func(self, *args):
+        
+        angles = args[0]
+        params = [0, 0, 0, 0, 0, 0]
+        variables = ['h_immers', 'h_film', 'n_substr', 'm_substr',
+                     'n_film', 'm_film']
+        
+        arg_id = 1
+        for ind, var in enumerate(variables):
+            if var in self.fixed_params:
+                params[ind] = self.fixed_params[var]
+            else:
+                params[ind] = args[arg_id]
+                arg_id += 1
 
-def rp_fit(angles, hf, him, nf, mf):
-    """ The fitted Rp function. Used to fit Hf, nf, and mf given a
-    list of angles (in degrees).
-    """
-    model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
-                            h_immers=him, h_film=hf,
-                            n_substr=1.515, m_substr=0,
-                            n_film=nf, m_film=mf)
-    rp = model.Rp_curve_fit(angles)
-    return rp
-
-
-def rs_fit_gap(angles, him):
-    """ The fitted Rs function for the gap. Used to fit H_im given a
-    list of angles (in degrees).
-    """
-    model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
-                            h_immers=him, h_film=450,
-                            n_substr=1.515, m_substr=0,
-                            n_film=1.9819, m_film=0.002)
-    rs = model.Rs_curve_fit(angles)
-    return rs
-
+        model = ReflectionModel(lamb=632.8, n_prism=(2.5822, 2.8639),
+                                h_immers=params[0],
+                                h_film=params[1],
+                                n_substr=params[2],
+                                m_substr=params[3],
+                                n_film=params[4],
+                                m_film=params[5])
+        if self.polarization == 's':
+            ret = model.Rs_curve_fit(angles)
+        elif self.polarization == 'p':
+            ret = model.Rp_curve_fit(angles)
+        return ret
 
 def pygad_fitting(model_func, x_data, y_data, bounds):
 
