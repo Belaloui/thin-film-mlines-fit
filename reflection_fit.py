@@ -111,8 +111,7 @@ if fit_method == 'scipy':
     curve_fitted = model_func(curve.x, *params)
 elif fit_method == 'pygad':
     params, curve_fitted = pygad_fitting(model_func, curve.x, corrected_y,
-                                          bounds=[[420, 20, 1.9, 0],
-                                                  [500, 160, 2, 0.1]])
+                                          bounds=[min_bounds, max_bounds])
 else:
     raise ValueError(f'The fitting method cannot be {fit_method}! It can '
                      f'either be \'scipy\' or \'pygad\'.')

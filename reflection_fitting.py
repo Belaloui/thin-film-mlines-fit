@@ -44,9 +44,7 @@ class ModelFunction:
 def pygad_fitting(model_func, x_data, y_data, bounds):
 
     def fitness(solution, solution_idx):
-        output = model_func(angles=x_data,
-                            hf=solution[0], him=solution[1],
-                            nf=solution[2], mf=solution[3])
+        output = model_func(x_data, *solution)
 
         sqr_sum = 0
         for a, b in zip(y_data, output):
@@ -59,11 +57,16 @@ def pygad_fitting(model_func, x_data, y_data, bounds):
         print(f"Generation = {ga_instance.generations_completed}")
         print(f"Fitness    = {ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)[1]}")
 
-    num_generations = 20  # Number of generations.
+    num_generations = 30  # Number of generations.
     num_parents_mating = 8
 
     sol_per_pop = 50  # Number of solutions in the population.
-    num_genes = 4
+    num_genes = len(bounds[0])  # Number of parameters to fit.
+    
+    # Generating the bounds dictionnaries for PyGAD
+    bounds_list = []
+    for ind, (low, high) in enumerate(zip(bounds[0], bounds[1])):
+        bounds_list.append({'low': low, 'high':high})
 
     ga_instance = pg.GA(num_generations=num_generations,
                         num_parents_mating=num_parents_mating,
@@ -71,17 +74,12 @@ def pygad_fitting(model_func, x_data, y_data, bounds):
                         num_genes=num_genes,
                         mutation_num_genes=1,
                         fitness_func=fitness,
-                        gene_space=[{"low": bounds[0][0], "high": bounds[1][0]},
-                                    {"low": bounds[0][1], "high": bounds[1][1]},
-                                    {"low": bounds[0][2], "high": bounds[1][2]},
-                                    {"low": bounds[0][3], "high": bounds[1][3]}],
+                        gene_space=bounds_list,
                         on_generation=on_gen)
 
     ga_instance.run()
     solution, solution_fitness, solution_idx =\
         ga_instance.best_solution(ga_instance.last_generation_fitness)
 
-    return solution, model_func(angles=x_data,
-                                hf=solution[0], him=solution[1],
-                                nf=solution[2], mf=solution[3])
+    return solution, model_func(x_data, *solution)
 # ------------- Fitting tools ------------
