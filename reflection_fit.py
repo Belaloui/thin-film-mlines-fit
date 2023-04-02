@@ -173,6 +173,22 @@ if fit_method == 'scipy':
     np.savetxt(f'{res_path}/{time_str}_covariances.txt', pcov,
                delimiter=', ')
 
+# Saving all outputs
+with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
+    # Printing the curve's file name. VERBOSE
+    out_file.write(f'Using "{curve_filename}"\n')
+    # Printing the curve's file name. VERBOSE
+    if background_removal:
+        out_file.write(f'With background "{transfer_filename}"\n')
+
+    # Printing the script parameters. VERBOSE
+    out_file.write( 'Method | Polar. | BG remove\n')
+    out_file.write(f' {fit_method} |   {polarization}    | {background_removal}\n')
+    
+    out_file.write('\n')
+    out_file.write(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
+    out_file.write(f'R^2 = {r_sqr}\n')
+
 # Saving the config file
 shutil.copyfile(config_filename, f'{res_path}/{time_str}_config.txt')
 
