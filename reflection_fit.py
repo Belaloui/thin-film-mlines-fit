@@ -17,6 +17,7 @@ from scipy.optimize import curve_fit
 from reflection_fitting import pygad_fitting, ModelFunction
 from mlines_data_tools import write_curve_data,\
     read_curve_metricon, read_config
+from reflection_stats import r_squared
 
 # ---------- Parser ----------
 parser = argparse.ArgumentParser()
@@ -116,10 +117,13 @@ else:
     raise ValueError(f'The fitting method cannot be {fit_method}! It can '
                      f'either be \'scipy\' or \'pygad\'.')
 
+# Computing R^2
+r_sqr = r_squared(curve_fitted, corrected_y)
 
 # ------------- Showing the results -------------
 print('\n')
-print(f'Fitted parameters : {list(bounds_dict.keys())} = {params}')
+print(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
+print(f'R^2 = {r_sqr}\n')
 
 fig, ax = plt.subplots()
 
@@ -171,3 +175,4 @@ if fit_method == 'scipy':
 
 # Saving the config file
 shutil.copyfile(config_filename, f'{res_path}/{time_str}_config.txt')
+
