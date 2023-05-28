@@ -151,7 +151,7 @@ plt.show()
 
 # Get date and time for files names
 dt = datetime.datetime.now()
-time_str = dt.strftime("%Y%m%d%H%M%S")
+time_str = dt.strftime("%Y-%m-%d-%H-%M-%S")
 
 # Creating the results folder
 res_path = f'{time_str}_results'
