@@ -120,16 +120,19 @@ else:
 # Computing R^2
 r_sqr = r_squared(curve_fitted, corrected_y)
 
-# Computing standard deviations
+# Computing standard deviations and 95% CIs
 perr = None
 if fit_method == 'scipy':
     perr = std_dev(pcov)
+    ci_95 = [(p-1.96*e, p+1.96*e) for p, e in zip(params, perr)]
+
 
 # ------------- Showing the results -------------
 print('\n')
 print(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
 if perr is not None:
     print(f'std_devs : {perr}')
+    print(f'95% CI : {ci_95}')
 
 print(f'R^2 = {r_sqr}\n')
     
@@ -183,6 +186,8 @@ if fit_method == 'scipy':
                delimiter=', ')
     np.savetxt(f'{res_path}/{time_str}_std_devs.txt', perr,
                delimiter=', ')
+    np.savetxt(f'{res_path}/{time_str}_95_CI.txt', ci_95,
+               delimiter=', ')
 
 # Saving all outputs
 with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
@@ -200,7 +205,9 @@ with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
     out_file.write(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
     if perr is not None:
         out_file.write(f'std_devs : {perr}')
-    out_file.write(f'R^2 = {r_sqr}\n')
+        out_file.write(f'95% CI : {ci_95}')
+
+    out_file.write(f'R^2 = {r_sqr}\n') 
 
 # Saving the config file
 shutil.copyfile(config_filename, f'{res_path}/{time_str}_config.txt')
