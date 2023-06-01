@@ -17,7 +17,7 @@ from scipy.optimize import curve_fit
 from reflection_fitting import pygad_fitting, ModelFunction
 from mlines_data_tools import write_curve_data,\
     read_curve_metricon, read_config
-from reflection_stats import r_squared
+from reflection_stats import r_squared, std_dev
 
 # ---------- Parser ----------
 parser = argparse.ArgumentParser()
@@ -120,10 +120,19 @@ else:
 # Computing R^2
 r_sqr = r_squared(curve_fitted, corrected_y)
 
+# Computing standard deviations
+perr = None
+if fit_method == 'scipy':
+    perr = std_dev(pcov)
+
 # ------------- Showing the results -------------
 print('\n')
 print(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
+if perr is not None:
+    print(f'std_devs : {perr}')
+
 print(f'R^2 = {r_sqr}\n')
+    
 
 fig, ax = plt.subplots()
 
@@ -172,6 +181,8 @@ np.savetxt(f'{res_path}/{time_str}_fitted_parameters.txt', params,
 if fit_method == 'scipy':
     np.savetxt(f'{res_path}/{time_str}_covariances.txt', pcov,
                delimiter=', ')
+    np.savetxt(f'{res_path}/{time_str}_std_devs.txt', perr,
+               delimiter=', ')
 
 # Saving all outputs
 with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
@@ -187,6 +198,8 @@ with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
     
     out_file.write('\n')
     out_file.write(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
+    if perr is not None:
+        out_file.write(f'std_devs : {perr}')
     out_file.write(f'R^2 = {r_sqr}\n')
 
 # Saving the config file

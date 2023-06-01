@@ -15,3 +15,8 @@ def r_squared(x, y):
     r_sqr = 1 - (ss_res / ss_tot)
     
     return r_sqr
+
+
+def std_dev(pcov):
+    return np.sqrt(np.diag(pcov))
+    
