@@ -19,6 +19,9 @@ from mlines_data_tools import write_curve_data,\
     read_curve_metricon, read_config
 from reflection_stats import r_squared, std_dev
 
+# Hyper params
+n_pygad_fits = 5
+
 # ---------- Parser ----------
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', metavar='Configuration file', type=str,
@@ -36,6 +39,10 @@ parser.add_argument('--pol', metavar='Polarization', type=str,
 parser.add_argument('--rb', metavar='Background curve', type=str,
                     help="When a background curve is provided, it is "
                          "used to remove the measurement curve's backgound")
+parser.add_argument('--std', metavar='Standard deviation', action=argparse.BooleanOptionalAction,
+                    help=f"When set, {n_pygad_fits} fittings are performed "
+                         f"to get the standard deviations for the GA results.")
+
 args = parser.parse_args()
 # ---------- Parser ----------
 
@@ -49,6 +56,9 @@ background_removal = args.rb is not None
 config_filename = args.config
 transfer_filename = args.rb
 curve_filename = args.curve
+
+# Compute STDs for pygad?
+pygad_std = args.std is not None
 
 # Printing the curve's file name. VERBOSE
 print(f'Using "{curve_filename}"\n')
@@ -111,8 +121,19 @@ if fit_method == 'scipy':
                               verbose=2)
     curve_fitted = model_func(curve.x, *params)
 elif fit_method == 'pygad':
-    params, curve_fitted = pygad_fitting(model_func, curve.x, corrected_y,
-                                          bounds=[min_bounds, max_bounds])
+    if not pygad_std:
+        params, curve_fitted = pygad_fitting(model_func, curve.x, corrected_y,
+                                             bounds=[min_bounds, max_bounds])
+    else:
+        pygad_res = [pygad_fitting(model_func, curve.x, corrected_y,
+                                   bounds=[min_bounds, max_bounds])
+                        for _ in range(n_pygad_fits)]
+        params_list = [elem[0] for elem in pygad_res]
+        curve_list = [elem[1] for elem in pygad_res]
+        
+        params = np.mean(params_list, axis=0)
+        curve_fitted = np.mean(curve_list, axis=0)
+
 else:
     raise ValueError(f'The fitting method cannot be {fit_method}! It can '
                      f'either be \'scipy\' or \'pygad\'.')
@@ -124,6 +145,9 @@ r_sqr = r_squared(curve_fitted, corrected_y)
 perr = None
 if fit_method == 'scipy':
     perr = std_dev(pcov)
+    ci_95 = [(p-1.96*e, p+1.96*e) for p, e in zip(params, perr)]
+elif fit_method == 'pygad' and pygad_std:
+    perr = np.std(params_list, axis=0)
     ci_95 = [(p-1.96*e, p+1.96*e) for p, e in zip(params, perr)]
 
 
@@ -184,10 +208,14 @@ np.savetxt(f'{res_path}/{time_str}_fitted_parameters.txt', params,
 if fit_method == 'scipy':
     np.savetxt(f'{res_path}/{time_str}_covariances.txt', pcov,
                delimiter=', ')
+
+# Saving errors and intervals
+if perr is not None:
     np.savetxt(f'{res_path}/{time_str}_std_devs.txt', perr,
                delimiter=', ')
     np.savetxt(f'{res_path}/{time_str}_95_CI.txt', ci_95,
                delimiter=', ')
+
 
 # Saving all outputs
 with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
@@ -204,8 +232,8 @@ with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
     out_file.write('\n')
     out_file.write(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
     if perr is not None:
-        out_file.write(f'std_devs : {perr}')
-        out_file.write(f'95% CI : {ci_95}')
+        out_file.write(f'std_devs : {perr}\n')
+        out_file.write(f'95% CI : {ci_95}\n')
 
     out_file.write(f'R^2 = {r_sqr}\n') 
 
