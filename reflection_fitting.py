@@ -41,15 +41,17 @@ class ModelFunction:
             ret = model.Rp_curve_fit(angles)
         return ret
 
-def pygad_fitting(model_func, x_data, y_data, bounds):
+def pygad_fitting(model_func, x_data, y_data, bounds, n_gens=30):
 
     def fitness(solution, solution_idx):
         output = model_func(x_data, *solution)
 
-        sqr_sum = 0
-        for a, b in zip(y_data, output):
-            sqr_sum += (a-b)**2
-        n_rmse = np.sqrt(np.mean(sqr_sum))/np.mean(y_data)
+        # sqr_sum = 0
+        # for a, b in zip(y_data, output):
+        #     sqr_sum += (a-b)**2
+        # n_rmse = np.sqrt(np.mean(sqr_sum))/np.mean(y_data)
+
+        n_rmse = np.sqrt(np.mean(np.sum((np.array(output)-np.array(y_data))**2)))/np.mean(np.array(y_data))
         return -n_rmse
 
 
@@ -57,7 +59,7 @@ def pygad_fitting(model_func, x_data, y_data, bounds):
         print(f"Generation = {ga_instance.generations_completed}")
         print(f"Fitness    = {ga_instance.best_solution(pop_fitness=ga_instance.last_generation_fitness)[1]}")
 
-    num_generations = 30  # Number of generations.
+    num_generations = n_gens  # Number of generations.
     num_parents_mating = 8
 
     sol_per_pop = 50  # Number of solutions in the population.
