@@ -155,7 +155,8 @@ elif fit_method == 'pygad':
         curve_list = [elem[1] for elem in pygad_res]
         
         params = np.mean(params_list, axis=0)
-        curve_fitted = np.mean(curve_list, axis=0)
+        #curve_fitted = np.mean(curve_list, axis=0)
+        curve_fitted = model_func(curve.x, *params)
 
 # Computing R^2
 r_sqr = r_squared(curve_fitted, corrected_y)
@@ -247,7 +248,8 @@ with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
     # Printing the script parameters. VERBOSE
     out_file.write( 'Method | Polar. | BG remove\n')
     out_file.write(f' {fit_method} |   {polarization}    | {background_removal}\n')
-    
+    if(fit_method == 'pygad'):
+        out_file.write(f'{n_gens} generations per fitting.')
     out_file.write('\n')
     out_file.write(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
     if perr is not None:
