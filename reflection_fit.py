@@ -21,24 +21,27 @@ from reflection_stats import r_squared, std_dev
 
 # Hyper params
 n_pygad_fits = 5
+n_gens = 30
 
 # ---------- Parser ----------
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', metavar='Configuration file', type=str,
                     required=True,
-                    help="The path to the model configuration file")
+                    help="The path to the model configuration file.")
 parser.add_argument('--curve', metavar='Measurement curve', type=str,
                     required=True,
                     help="The path to the curve's data")
 parser.add_argument('--fit_method', metavar='Fitting method', type=str,
                     default='scipy',
-                    help="Can either be 'scipy' or 'pygad'")
+                    help=f"Can either be 'scipy', 'pygad', or 'pygad:N_GENS', "
+                         f"where N_GENS is the maximum number of generations"
+                         f" for the genetic algorithm. By default, it is {n_gens}.")
 parser.add_argument('--pol', metavar='Polarization', type=str,
                     required=True,
-                    help="Can either be 's' or 'p'")
+                    help="Can either be 's' or 'p'.")
 parser.add_argument('--rb', metavar='Background curve', type=str,
                     help="When a background curve is provided, it is "
-                         "used to remove the measurement curve's backgound")
+                         "used to remove the measurement curve's backgound.")
 parser.add_argument('--std', metavar='Standard deviation', action=argparse.BooleanOptionalAction,
                     help=f"When set, {n_pygad_fits} fittings are performed "
                          f"to get the standard deviations for the GA results.")
@@ -48,8 +51,22 @@ args = parser.parse_args()
 
 print('\n    -----  M-Lines fitting script  -----\n')  # Header
 
-# Script's parameters
-fit_method = args.fit_method
+# --------------- Script's parameters --------------- #
+fit_method_input = args.fit_method
+if fit_method_input in ['scipy', 'pygad']:
+    fit_method = args.fit_method
+elif ':' in fit_method_input:
+    fit_method, n_gens = fit_method_input.split(':')
+    if fit_method != 'pygad':
+        raise ValueError(f'The fitting method cannot be \'{fit_method_input}\'! It can '
+                     f'either be \'scipy\' or \'pygad\'.')
+    if n_gens.isdigit():
+        n_gens = int(n_gens)
+    else:
+        raise ValueError(f'\'{n_gens}\' is not a valid number of generations!')
+else:
+    raise ValueError(f'The fitting method cannot be \'{fit_method_input}\'! It can '
+                     f'either be \'scipy\' or \'pygad\'.')
 polarization = args.pol
 background_removal = args.rb is not None
 
@@ -59,6 +76,7 @@ curve_filename = args.curve
 
 # Compute STDs for pygad?
 pygad_std = args.std is not None
+# --------------- Script's parameters --------------- #
 
 # Printing the curve's file name. VERBOSE
 print(f'Using "{curve_filename}"\n')
@@ -68,7 +86,10 @@ if background_removal:
 
 # Printing the script parameters. VERBOSE
 print( 'Method | Polar. | BG remove')
-print(f' {fit_method} |   {polarization}    | {background_removal}\n')
+print(f' {fit_method} |   {polarization}    | {background_removal}')
+if(fit_method == 'pygad'):
+    print(f'{n_gens} generations per fitting.\n')
+print('\n')
 
 if polarization not in ['s', 'p']:
     raise ValueError(f'The polarization cannot be {polarization}! It can '
@@ -123,20 +144,18 @@ if fit_method == 'scipy':
 elif fit_method == 'pygad':
     if not pygad_std:
         params, curve_fitted = pygad_fitting(model_func, curve.x, corrected_y,
-                                             bounds=[min_bounds, max_bounds])
+                                             bounds=[min_bounds, max_bounds],
+                                             n_gens=n_gens)
     else:
         pygad_res = [pygad_fitting(model_func, curve.x, corrected_y,
-                                   bounds=[min_bounds, max_bounds])
+                                   bounds=[min_bounds, max_bounds],
+                                             n_gens=n_gens)
                         for _ in range(n_pygad_fits)]
         params_list = [elem[0] for elem in pygad_res]
         curve_list = [elem[1] for elem in pygad_res]
         
         params = np.mean(params_list, axis=0)
         curve_fitted = np.mean(curve_list, axis=0)
-
-else:
-    raise ValueError(f'The fitting method cannot be {fit_method}! It can '
-                     f'either be \'scipy\' or \'pygad\'.')
 
 # Computing R^2
 r_sqr = r_squared(curve_fitted, corrected_y)
