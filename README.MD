@@ -33,3 +33,11 @@ We provide 2 datasets:
 ### Author and Citation
 The codes provided in the repository were prepared by [Nacer eddine Belaloui](https://github.com/Belaloui), researcher at [Constantine Quantum Technologies](https://cqtech.org).<br>
 If you use these codes in your work, please cite as per the included [BibTeX file](citation.bib).
+
+### License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
+
+### Copyright
+
+&copy; 2023 Nacer eddine Belaloui.
