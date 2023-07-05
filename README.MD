@@ -23,9 +23,7 @@ To use the fitting script `reflection_fit.py`, follow these steps:
 
 For more information on how to use the script, refer to the built-in help:
 
-    ```
-    python reflection_fit.py --help
-    ```
+``` python reflection_fit.py --help ``` 
 
 ## Data
 We provide 2 datasets:
