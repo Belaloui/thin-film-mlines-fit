@@ -21,6 +21,9 @@ To use the fitting script `reflection_fit.py`, follow these steps:
     python reflection_fit.py --config=config_file.txt --curve="Data_no_BG_cropped/T3_TE.csv" --fit_method=scipy --pol=s
     ```
 
+For more information on how to use the script, refer to the built-in help:<br>
+    `python reflection_fit.py --help`
+
 ## Data
 We provide 2 datasets:
 1. `Data_raw`: The raw dataset containing raw measurements for 1, 3, and 5 modes, plus a raw measurement for the background. (with no sample)
