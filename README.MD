@@ -21,8 +21,11 @@ To use the fitting script `reflection_fit.py`, follow these steps:
     python reflection_fit.py --config=config_file.txt --curve="Data_no_BG_cropped/T3_TE.csv" --fit_method=scipy --pol=s
     ```
 
-For more information on how to use the script, refer to the built-in help:<br>
-    `python reflection_fit.py --help`
+For more information on how to use the script, refer to the built-in help:
+
+    ```
+    python reflection_fit.py --help
+    ```
 
 ## Data
 We provide 2 datasets:
