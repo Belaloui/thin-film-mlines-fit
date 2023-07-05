@@ -20,7 +20,7 @@ from mlines_data_tools import write_curve_data,\
 from reflection_stats import r_squared, std_dev
 
 # Hyper params
-n_pygad_fits = 5
+n_pygad_fits = 10
 n_gens = 30
 
 # ---------- Parser ----------
@@ -147,15 +147,17 @@ elif fit_method == 'pygad':
                                              bounds=[min_bounds, max_bounds],
                                              n_gens=n_gens)
     else:
-        pygad_res = [pygad_fitting(model_func, curve.x, corrected_y,
+        pygad_res = [(pygad_fitting(model_func, curve.x, corrected_y,
                                    bounds=[min_bounds, max_bounds],
-                                             n_gens=n_gens)
-                        for _ in range(n_pygad_fits)]
+                                             n_gens=n_gens),
+                        print(f'Fitting {f}/{n_pygad_fits} done.\n'))[0]
+                        for f in range(1, n_pygad_fits+1)]
         params_list = [elem[0] for elem in pygad_res]
         curve_list = [elem[1] for elem in pygad_res]
         
         params = np.mean(params_list, axis=0)
-        curve_fitted = np.mean(curve_list, axis=0)
+        #curve_fitted = np.mean(curve_list, axis=0)
+        curve_fitted = model_func(curve.x, *params)
 
 # Computing R^2
 r_sqr = r_squared(curve_fitted, corrected_y)
@@ -247,7 +249,8 @@ with open(f'{res_path}/{time_str}_output.txt', 'w') as out_file:
     # Printing the script parameters. VERBOSE
     out_file.write( 'Method | Polar. | BG remove\n')
     out_file.write(f' {fit_method} |   {polarization}    | {background_removal}\n')
-    
+    if(fit_method == 'pygad'):
+        out_file.write(f'{n_gens} generations per fitting.')
     out_file.write('\n')
     out_file.write(f'Fitted parameters : {list(bounds_dict.keys())} = {params}\n')
     if perr is not None:
