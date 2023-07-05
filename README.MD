@@ -4,7 +4,7 @@ This repository provides tools for fitting the parameters of a prism coupling te
 
 They take as input CSV files as output by the Metricon machine and output the model's fitted parameters.
 
-The fitting process is performed using either SciPy's `curve_fit` function or a genetic algorithm implemented using the PyGAD package.
+The fitting process is performed using either [SciPy](https://github.com/scipy/scipy)'s `curve_fit` function or a genetic algorithm implemented using the [PyGAD](https://github.com/ahmedfgad/GeneticAlgorithmPython) package.
 
 ## How to Use
 
