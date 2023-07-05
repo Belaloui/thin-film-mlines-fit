@@ -1,4 +1,4 @@
-# M-Lines Repository
+# M-Lines Fitting for Thin Film Waveguides: Prism Coupler Analysis Tools
 
 ### Example of a fitting command
 ```
