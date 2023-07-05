@@ -18,8 +18,13 @@ To use the fitting script `reflection_fit.py`, follow these steps:
 1. Run the main script using the following command-line arguments:
 
     ```
-    python reflection_fit.py --config=config_file.txt --curve="New Data/T3_TE.csv" --fit_method=scipy --pol=s
+    python reflection_fit.py --config=config_file.txt --curve="Data_no_BG_cropped/T3_TE.csv" --fit_method=scipy --pol=s
     ```
+
+## Data
+We provide 2 datasets:
+1. `Data_raw`: The raw dataset containing raw measurements for 1, 3, and 5 modes, plus a raw measurement for the background. (with no sample)
+1. `Data_no_BG_cropped`: The background corrected and cropped data for the same measurements.
 
 ### Author and Citation
 The codes provided in the repository were prepared by [Nacer eddine Belaloui](https://github.com/Belaloui), researcher at [Constantine Quantum Technologies](https://cqtech.org).<br>

@@ -1,3 +1,5 @@
+# T3_TE
 fixed = n_substr(1.51), m_substr(0)
-bounds = h_immers(20, 200), h_film(400, 500), n_film(1.9, 2), m_film(0, 0.1)
-# limits = 32, 52
+bounds = h_immers(20, 200), h_film(600, 700), n_film(1.9, 2), m_film(0, 0.1)
+# limits on internal angle (in deg)
+limits = 32, 52
