@@ -17,7 +17,7 @@ from scipy.optimize import curve_fit
 from fitting_tools import pygad_fitting, ModelFunction
 from mlines_data_tools import write_curve_data,\
     read_curve_metricon, read_config
-from reflection_stats import r_squared, std_dev
+from stat_tools import r_squared, std_dev
 
 # Hyper params
 n_pygad_fits = 10

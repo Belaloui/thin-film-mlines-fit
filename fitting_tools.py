@@ -1,4 +1,4 @@
-from reflection_coeffs import ReflectionModel
+from prism_coupler_model import ReflectionModel
 import numpy as np
 import pygad as pg
 
