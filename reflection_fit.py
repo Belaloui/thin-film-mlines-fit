@@ -20,7 +20,7 @@ from mlines_data_tools import write_curve_data,\
 from reflection_stats import r_squared, std_dev
 
 # Hyper params
-n_pygad_fits = 5
+n_pygad_fits = 10
 n_gens = 30
 
 # ---------- Parser ----------
@@ -147,10 +147,11 @@ elif fit_method == 'pygad':
                                              bounds=[min_bounds, max_bounds],
                                              n_gens=n_gens)
     else:
-        pygad_res = [pygad_fitting(model_func, curve.x, corrected_y,
+        pygad_res = [(pygad_fitting(model_func, curve.x, corrected_y,
                                    bounds=[min_bounds, max_bounds],
-                                             n_gens=n_gens)
-                        for _ in range(n_pygad_fits)]
+                                             n_gens=n_gens),
+                        print(f'Fitting {f}/{n_pygad_fits} done.\n'))[0]
+                        for f in range(1, n_pygad_fits+1)]
         params_list = [elem[0] for elem in pygad_res]
         curve_list = [elem[1] for elem in pygad_res]
         
