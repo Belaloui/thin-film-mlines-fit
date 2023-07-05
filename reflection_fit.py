@@ -14,7 +14,7 @@ import argparse
 import numpy as np
 from scipy.optimize import curve_fit
 
-from reflection_fitting import pygad_fitting, ModelFunction
+from fitting_tools import pygad_fitting, ModelFunction
 from mlines_data_tools import write_curve_data,\
     read_curve_metricon, read_config
 from reflection_stats import r_squared, std_dev
