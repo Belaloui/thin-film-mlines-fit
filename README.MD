@@ -1,6 +1,6 @@
 # Fitting for Thin Film Waveguides: Prism Coupler Analysis Tools
 
-This repository provides tools for fitting the parameters of a prism coupling technique model by [Sokolov et al.](https://iopscience.iop.org/article/10.1070/QE2015v045n09ABEH015852) to experimental data obtained from Metricon Prism Coupler machines. This model's parameters define the properties of thin film waveguides. 
+This repository provides tools for fitting the parameters of a prism coupling technique model by [Sokolov et al.](https://iopscience.iop.org/article/10.1070/QE2013v043n12ABEH015272) to experimental data obtained from Metricon Prism Coupler machines. This model's parameters define the properties of thin film waveguides. 
 
 They take as input CSV files as output by the Metricon machine and output the model's fitted parameters.
 
